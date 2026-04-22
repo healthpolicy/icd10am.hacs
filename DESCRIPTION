@@ -1,0 +1,31 @@
+Package: icd10am.hacs
+Title: Hospital Acquired Complications for ICD-10-AM Coded Data
+Version: 0.1.0
+Authors@R:
+    person("Jim", "Pearse", email = "ejpearse@gmail.com", role = c("aut", "cre"))
+Description: Identifies Hospital Acquired Complications (HACs) in Australian admitted patient care data coded using ICD-10-AM, using the ACSQHC HAC classification.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends:
+    R (>= 4.1.0)
+Imports:
+    icd10am.utils,
+    dplyr,
+    tidyr,
+    rlang,
+    magrittr,
+    stringr,
+    tibble,
+    stats
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    pkgdown
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+URL: https://github.com/healthpolicy/icd10am.hacs
+BugReports: https://github.com/healthpolicy/icd10am.hacs/issues
+
