@@ -1,0 +1,542 @@
+---
+title: "HAC Specifications: Version 3.2.2 (ICD-10-AM 13th Edition)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{HAC Specifications: Version 3.2.2 (ICD-10-AM 13th Edition)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse   = TRUE,
+  comment    = "#>",
+  echo       = FALSE,
+  message    = FALSE,
+  warning    = FALSE
+)
+library(icd10am.hacs)
+library(knitr)
+
+# Helper: return a kable of all numerator codes for a sub_category string match
+hac_table <- function(sub_cat_pattern, role_filter = "numerator",
+                      tbl = hac_table_a,
+                      caption = NULL) {
+  df <- subset(
+    tbl,
+    icd_edition == "icd10am_13" & hac_v3_2_2 == TRUE &
+      role == role_filter &
+      grepl(sub_cat_pattern, sub_category, fixed = TRUE)
+  )
+  if (nrow(df) == 0L) return(invisible(NULL))
+  df <- df[order(df$sub_category, df$code_dot), c("sub_category", "code_dot", "description")]
+  names(df) <- c("Sub-category", "Code", "Description")
+  kable(df, row.names = FALSE, caption = caption)
+}
+
+# Helper: return a kable from a non-hac_table_a dataset
+simple_table <- function(df, caption = NULL) {
+  df <- df[order(df$sub_category, df$code_dot),
+           c("sub_category", "code_dot", "description")]
+  names(df) <- c("Sub-category", "Code", "Description")
+  kable(df, row.names = FALSE, caption = caption)
+}
+```
+
+## Background
+
+A hospital-acquired complication (HAC) refers to a complication for which
+clinical risk mitigation strategies may reduce (but not necessarily eliminate)
+the risk of that complication occurring. The national list of 16 HACs was
+developed by the Australian Commission on Safety and Quality in Health Care
+(the Commission) through a comprehensive process that included reviews of the
+literature, clinical engagement and testing of the concept with public and
+private hospitals. The 16 complications can be broken down into 43 diagnoses
+to allow for more detailed analysis. More information about the development of
+the list is described on the Commission's website.
+
+**Source:** <https://www.safetyandquality.gov.au/our-work/indicators/hospital-acquired-complications>
+
+---
+
+## Counting rules
+
+HACs can be counted at the complication level (n=16) or the diagnosis level
+(n=43), however, they should not be counted at the ICD-10-AM code level as
+this may lead to double counting. For example, there are many codes used to
+specify the diagnosis of 'Blood stream infection' --- a patient may have
+multiple sepsis codes in one separation, e.g. unspecified sepsis, puerperal
+sepsis and severe sepsis. This should be counted as one 'blood stream
+infection', as these sepsis codes most likely refer to the same infection.
+
+---
+
+## Monitoring of HACs in different patient groups
+
+Some patient groups have different rates of HACs. Monitoring of these patients
+separately will allow safety and quality interventions to be targeted and
+provide hospitals and clinicians with additional detail on the care they
+provide. Each service will have different requirements and should consider their
+casemix when deciding how to monitor HACs. Some groups that may be monitored
+separately include, but are not limited to:
+
+- Patients receiving mental health care
+- Sub-acute patients
+- Paediatric patients
+
+---
+
+## Intellectual property
+
+The Commission owns all Intellectual Property Rights in the hospital-acquired
+complications list subject to any third party Intellectual Property Rights that
+may rest in the list. The Commission gives no warranty and makes no
+representation as to the quality of the output of the list and users of the
+list do so at their own risk.
+
+The Commission recommends that the list is used as a part of a suite of
+indicators to monitor safety and quality of care rather than as a stand-alone
+measure.
+
+The HACs list is provided free of charge for non-commercial purposes. If an
+organisation would like to use the list for commercial purposes they should
+request this in writing to the Commission by emailing
+<indicators@safetyandquality.gov.au>.
+
+---
+
+## Provision of the list to third parties
+
+To assist in version control, the Commission asks that users do not circulate
+the HACs specifications outside of their organisation but to direct new users
+to download a copy of the codes from the Commission's website.
+
+---
+
+## Revisions
+
+The HACs list will be updated with each new edition of ICD-10-AM and released
+on the Commission's website.
+
+---
+
+## Specifications for complications
+
+This vignette shows diagnosis codes active under **HAC specification version
+3.2.2** (September 2025) for **ICD-10-AM 13th edition** codes. All 619 active
+numerator code rows across HACs 1--14, 15 and 16 are presented. HAC 5
+(Unplanned ICU admission) is not represented by ICD-10-AM diagnosis codes ---
+that complication is measured using an ICU admission data item not included in
+the standard Admitted Patient Care collection.
+
+For technical details of the classification algorithm see the function
+documentation: `?identify_hacs`.
+
+---
+
+## HAC 1 -- Pressure injury
+
+Pressure injuries (also known as pressure ulcers or bed sores) are areas of
+damage to the skin and underlying tissue caused by unrelieved pressure. The HAC
+covers Stages III and IV, unstageable, suspected deep tissue injury, and
+unspecified/unclassified pressure injuries acquired during the admission.
+
+```{r hac1-1}
+hac_table("1.1", caption = "1.1 Stage III ulcer")
+```
+
+```{r hac1-2}
+hac_table("1.2", caption = "1.2 Stage IV ulcer")
+```
+
+```{r hac1-3}
+hac_table("1.3", caption = "1.3 Unspecified decubitus and pressure area")
+```
+
+```{r hac1-4}
+hac_table("1.4", caption = "1.4 Unstageable pressure injury")
+```
+
+```{r hac1-5}
+hac_table("1.5", caption = "1.5 Suspected deep tissue injury")
+```
+
+---
+
+## HAC 2 -- Falls resulting in fracture or other intracranial injury
+
+A fall-related HAC requires both a qualifying injury code (fracture or
+intracranial injury) **and** a fall external-cause code (W01x, W03x, W04x,
+W05x, W06x, W07x, W08x, W09x, W10x, W18) in a sequence that places the fall
+after the injury diagnosis. Place-of-occurrence checking was removed in v3.x.
+
+```{r hac2-1}
+hac_table("2.1", caption = "2.1 Intracranial injury")
+```
+
+```{r hac2-2}
+hac_table("2.2", caption = "2.2 Fractured neck of femur")
+```
+
+```{r hac2-3}
+hac_table("2.3", caption = "2.3 Other fractures")
+```
+
+---
+
+## HAC 3 -- Healthcare-associated infection
+
+Healthcare-associated infections (HAIs) cover a broad range of infections
+acquired during an admission. The sub-categories cover urinary tract
+infections, surgical site infections, pneumonia, bloodstream infections,
+catheter-related infections, multi-resistant organisms, prosthetic/implantable
+device infections, gastrointestinal infections, and other high-impact
+infections.
+
+```{r hac3-1}
+hac_table("3.1", caption = "3.1 Urinary tract infection")
+```
+
+```{r hac3-2}
+hac_table("3.2", caption = "3.2 Surgical site infection")
+```
+
+```{r hac3-3}
+hac_table("3.3", caption = "3.3 Pneumonia")
+```
+
+```{r hac3-4}
+hac_table("3.4", caption = "3.4 Blood stream infection")
+```
+
+```{r hac3-5}
+hac_table("3.5", caption = "3.5 Infections or inflammatory complications associated with peripheral/central venous catheters")
+```
+
+```{r hac3-6}
+hac_table("3.6", caption = "3.6 Multi-resistant organism")
+```
+
+```{r hac3-7}
+hac_table("3.7", caption = "3.7 Infection associated with prosthetics/implantable devices")
+```
+
+```{r hac3-8}
+hac_table("3.8", caption = "3.8 Gastrointestinal infections")
+```
+
+```{r hac3-9}
+hac_table("3.9", caption = "3.9 Other high impact infections")
+```
+
+---
+
+## HAC 4 -- Surgical complications requiring unplanned return to theatre
+
+Sub-categories 4.1 (haematoma), 4.3 (anastomotic leak), and 4.5 (other
+complications) require additional algorithmic criteria beyond the diagnosis
+code:
+
+- **4.1 Haematoma** requires a haematoma-drainage or transfusion ACHI
+  procedure code in the same episode.
+- **4.3 Anastomotic leak** requires external-cause code Y83.2 (anastomosis
+  procedure) to appear after the leak diagnosis.
+- **4.2, 4.4, 4.5** are unconditional (diagnosis code alone is sufficient).
+
+> **Note:** HAC 4 (unplanned return to theatre, sub-category 4.5 and related)
+> is partially dependent on data items not currently collected in all
+> Admitted Patient Care collections. Sub-categories 4.1--4.4 are implementable
+> from standard NMDS data.
+
+```{r hac4-1}
+hac_table("4.1", caption = "4.1 Postoperative haemorrhage/haematoma requiring transfusion and/or return to theatre")
+```
+
+```{r hac4-2}
+hac_table("4.2", caption = "4.2 Surgical wound dehiscence")
+```
+
+```{r hac4-3}
+hac_table("4.3", caption = "4.3 Anastomotic leak")
+```
+
+```{r hac4-4}
+hac_table("4.4", caption = "4.4 Vascular graft failure")
+```
+
+```{r hac4-5}
+hac_table("4.5", caption = "4.5 Other surgical complications requiring unplanned return to theatre")
+```
+
+---
+
+## HAC 5 -- Unplanned intensive care unit admission
+
+Data items for this measure are not currently collected in the Admitted Patient
+Care (APC) data collection. These data elements may be collected locally and
+specifications for these data elements have been developed and are available on
+METeOR. Accordingly, **no ICD-10-AM codes are associated with this HAC** and
+it is not computed by `identify_hacs()`.
+
+---
+
+## HAC 6 -- Respiratory complications
+
+Respiratory complications cover failure requiring mechanical ventilation,
+aspiration pneumonia, and pulmonary oedema. Sub-category 6.1 requires an ACHI
+mechanical ventilation procedure code in addition to the diagnosis code.
+
+```{r hac6-1}
+hac_table("6.1", caption = "6.1 Respiratory failure including acute respiratory distress syndromes requiring ventilation")
+```
+
+```{r hac6-2}
+hac_table("6.2", caption = "6.2 Aspiration pneumonia")
+```
+
+```{r hac6-3}
+hac_table("6.3", caption = "6.3 Pulmonary oedema")
+```
+
+---
+
+## HAC 7 -- Venous thromboembolism
+
+Venous thromboembolism includes pulmonary embolism and deep vein thrombosis
+arising during an admitted episode.
+
+```{r hac7-1}
+hac_table("7.1", caption = "7.1 Pulmonary embolism")
+```
+
+```{r hac7-2}
+hac_table("7.2", caption = "7.2 Deep vein thrombosis")
+```
+
+---
+
+## HAC 8 -- Renal failure
+
+Renal failure requiring haemodialysis or continuous veno-venous
+haemodialysis. Sub-category 8.1 requires a dialysis ACHI procedure code in
+the episode and excludes patients with pre-existing chronic kidney disease
+Stage 4 (N18.4) or Stage 5 (N18.5).
+
+```{r hac8-1}
+hac_table("8.1", caption = "8.1 Renal failure requiring haemodialysis or continuous veno-venous haemodialysis")
+```
+
+---
+
+## HAC 9 -- Gastrointestinal bleeding
+
+```{r hac9-1}
+hac_table("9.1", caption = "9.1 Gastrointestinal bleeding")
+```
+
+---
+
+## HAC 10 -- Medication complications
+
+Medication-related complications span four sub-categories. Sub-categories 10.1
+and 10.4 require an external-cause code identifying the responsible drug to
+appear after the complication diagnosis in the coded sequence. Sub-categories
+10.2 and 10.5 are unconditional.
+
+> Note: sub-category 10.3 (Opioid-related) is not included in version 3.2.2.
+
+```{r hac10-1}
+hac_table("10.1", caption = "10.1 Drug-related respiratory complications/depression")
+```
+
+```{r hac10-2}
+hac_table("10.2", caption = "10.2 Haemorrhagic disorder due to circulating anticoagulants")
+```
+
+```{r hac10-4}
+hac_table("10.4", caption = "10.4 Movement disorders due to psychotropic medication")
+```
+
+```{r hac10-5}
+hac_table("10.5", caption = "10.5 Serious alteration to conscious state due to psychotropic medication")
+```
+
+---
+
+## HAC 11 -- Delirium
+
+```{r hac11-1}
+hac_table("11.1", caption = "11.1 Delirium")
+```
+
+---
+
+## HAC 12 -- Incontinence
+
+```{r hac12-1}
+hac_table("12.1", caption = "12.1 Urinary incontinence")
+```
+
+```{r hac12-2}
+hac_table("12.2", caption = "12.2 Faecal incontinence")
+```
+
+---
+
+## HAC 13 -- Endocrine complications
+
+```{r hac13-1}
+hac_table("13.1", caption = "13.1 Malnutrition")
+```
+
+```{r hac13-2}
+hac_table("13.2", caption = "13.2 Hypoglycaemia")
+```
+
+---
+
+## HAC 14 -- Cardiac complications
+
+Sub-category 14.2 (Arrhythmias) has a split logic for bradycardia (R00.1):
+
+- **cat14p2p1** -- R00.1 without a cardiac pacing procedure
+- **cat14p2p2** -- R00.1 with a cardiac pacing procedure
+
+Other arrhythmia codes in 14.2 are unconditional. Sub-categories 14.1, 14.3,
+14.4, and 14.5 are also unconditional.
+
+```{r hac14-1}
+hac_table("14.1", caption = "14.1 Heart failure and pulmonary oedema")
+```
+
+```{r hac14-2}
+hac_table("14.2", caption = "14.2 Arrhythmias")
+```
+
+```{r hac14-3}
+hac_table("14.3", caption = "14.3 Cardiac arrest")
+```
+
+```{r hac14-4}
+hac_table("14.4", caption = "14.4 Acute coronary syndrome including unstable angina, STEMI and NSTEMI")
+```
+
+```{r hac14-5}
+hac_table("14.5", caption = "14.5 Infective endocarditis")
+```
+
+---
+
+## HAC 15 -- Third and fourth degree perineal laceration during delivery
+
+HAC 15 applies to vaginal births only. An episode is included if it has:
+
+1. A numerator code (O70.2 or O70.3, Table 15a) **not** as the principal
+   diagnosis
+2. A vaginal birth outcome code (Table 15b) in the episode
+3. **No** elective or emergency caesarean section ACHI code (Table 15c)
+4. Admission mode is not a transfer from another facility
+5. Care type is not palliative, geriatric evaluation/management, or
+   maintenance (types 9, 10, 7.3)
+
+The output flags are:
+
+- `hac15p1` / `cat15p1p1` -- third degree laceration (O70.2)
+- `hac15p2` / `cat15p1p2` -- fourth degree laceration (O70.3)
+
+```{r hac15a}
+b_data <- subset(hac_table_b,
+                 icd_edition == "icd10am_13" & hac_v3_2_2 == TRUE)
+b_out <- b_data[order(b_data$code_dot), c("sub_category", "code_dot", "description")]
+names(b_out) <- c("Sub-category", "Code", "Description")
+kable(b_out, row.names = FALSE,
+      caption = "Table 15a: HAC 15 numerator codes (third/fourth degree perineal laceration)")
+```
+
+```{r hac15b}
+c_data <- subset(hac_table_c,
+                 icd_edition == "icd10am_13" & hac_v3_2_2 == TRUE)
+c_out <- c_data[order(c_data$code_dot), c("sub_category", "code_dot", "description")]
+names(c_out) <- c("Sub-category", "Code", "Description")
+kable(c_out, row.names = FALSE,
+      caption = "Table 15b: HAC 15 denominator codes (vaginal birth outcome)")
+```
+
+```{r hac15c}
+d_data <- subset(hac_table_d,
+                 icd_edition == "icd10am_13" & hac_v3_2_2 == TRUE)
+d_out <- d_data[order(d_data$achi_code), c("sub_category", "achi_code", "description")]
+names(d_out) <- c("Sub-category", "ACHI Code", "Description")
+kable(d_out, row.names = FALSE,
+      caption = "Table 15c: HAC 15 caesarean section exclusion codes (ACHI)")
+```
+
+---
+
+## HAC 16 -- Neonatal birth trauma
+
+HAC 16 applies to newborn episodes (care type 7) admitted from birth (not
+transfers). Episodes with exclusion codes indicating extreme prematurity or
+very low birth weight are excluded (Table 16b).
+
+The output flags are:
+
+- `hac16` (via `cat16p1`) -- neonatal birth trauma (16.1)
+- `hac16` (via `cat16p2`) -- hypoxic ischaemic encephalopathy (16.2)
+
+```{r hac16a}
+e_data <- subset(hac_table_e,
+                 icd_edition == "icd10am_13" & hac_v3_2_2 == TRUE)
+e_out <- e_data[order(e_data$sub_category, e_data$code_dot),
+                c("sub_category", "code_dot", "description")]
+names(e_out) <- c("Sub-category", "Code", "Description")
+kable(e_out, row.names = FALSE,
+      caption = "Table 16a: HAC 16 numerator codes (neonatal birth trauma)")
+```
+
+```{r hac16b}
+f_data <- subset(hac_table_f,
+                 icd_edition == "icd10am_13" & hac_v3_2_2 == TRUE)
+f_out <- f_data[order(f_data$code_dot), c("sub_category", "code_dot", "description")]
+names(f_out) <- c("Sub-category", "Code", "Description")
+kable(f_out, row.names = FALSE,
+      caption = "Table 16b: HAC 16 exclusion codes (prematurity/low birth weight)")
+```
+
+---
+
+## Summary: code counts by HAC and sub-category
+
+```{r summary-table}
+library(icd10am.hacs)
+
+active_a <- subset(hac_table_a,
+                   icd_edition == "icd10am_13" & hac_v3_2_2 == TRUE &
+                     role == "numerator")
+
+counts_a <- aggregate(code_dot ~ complication + sub_category,
+                      data = active_a, FUN = length)
+names(counts_a)[3] <- "n_codes"
+
+# Add HAC 15 and 16
+b16 <- data.frame(
+  complication = "15. Third and fourth degree perineal laceration during delivery",
+  sub_category = "15.1 Third and fourth degree perineal laceration during delivery",
+  n_codes      = nrow(subset(hac_table_b, icd_edition == "icd10am_13" & hac_v3_2_2 == TRUE))
+)
+e16_counts <- aggregate(
+  code_dot ~ sub_category,
+  data = subset(hac_table_e, icd_edition == "icd10am_13" & hac_v3_2_2 == TRUE),
+  FUN  = length
+)
+e16_counts$complication <- "16. Neonatal birth trauma"
+names(e16_counts)[2] <- "n_codes"
+e16_counts <- e16_counts[, c("complication", "sub_category", "n_codes")]
+
+all_counts <- rbind(counts_a, b16, e16_counts)
+all_counts <- all_counts[order(all_counts$complication, all_counts$sub_category), ]
+
+names(all_counts) <- c("Complication", "Sub-category", "Codes (ICD-10-AM 13th ed)")
+kable(all_counts, row.names = FALSE,
+      caption = "Numerator code counts per sub-category, HAC v3.2.2 / ICD-10-AM 13th edition")
+```
